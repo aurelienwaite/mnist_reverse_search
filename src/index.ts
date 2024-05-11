@@ -1,9 +1,13 @@
 //@ts-ignore
-import init, { greet } from 'my-crate';
+import init, { greet } from 'rs_crate';
 // Don't worry if vscode told you can't find my-crate
 // It's because you're using a local crate
 // after yarn dev, wasm-pack plugin will install my-crate for you
 import { mnistConsts, loadMnist, MNIST } from './data-loader';
+
+init().then((initOutput) =>{
+  //greet("Rory");
+});
 
 
 window.addEventListener("load", (event) => {
@@ -33,7 +37,7 @@ window.addEventListener("load", (event) => {
 
     for (let i = 0; i < numImages; ++i) {
       const imageIndex = Math.floor(Math.random() * mnistConsts.numImages)
-      const image = trainingSet.getRow(imageIndex);
+      const image = trainingSet[imageIndex];
       const row = Math.trunc(i / squareSize);
       const rowOffset = row * mnistConsts.numColumns * mnistConsts.numRows * 4 * squareSize;
       const col = i % squareSize;

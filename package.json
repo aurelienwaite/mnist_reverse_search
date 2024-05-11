@@ -1,18 +1,19 @@
 {
-  "name": "vite-plugin-wasm-pack-example",
+  "name": "mnist_rs",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "type": "module",
   "devDependencies": {
-    "vite": "^2.6.14",
-    "vite-plugin-wasm-pack": "^0.1.9"
+    "vite": "^5.2.11"
   },
   "scripts": {
-    "wasm": "wasm-pack build ./my-crate --target web",
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "rust": "cd rs_crate; wasm-pack build --target web; npm i ./pkg"
   },
   "dependencies": {
-    "ml-matrix": "^6.11.0"
+    "ml-matrix": "^6.11.0",
+    "rs_crate": "file:rs_crate/pkg"
   }
 }

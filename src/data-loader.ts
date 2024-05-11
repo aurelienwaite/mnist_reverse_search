@@ -2,16 +2,16 @@ import { Matrix } from 'ml-matrix';
 
 interface DataSet {
   dataset: string;
-  value: Matrix
+  value: Uint8Array[]
 }
 
 export interface MNIST{
   train: {
-    set: Matrix,
+    set: Uint8Array[],
     labels: Uint8Array
   }
   test: {
-    set: Matrix,
+    set: Uint8Array[],
     labels: Uint8Array,
   }
 }
@@ -59,10 +59,10 @@ async function getDb(db_name: string = "MNIST"): Promise<IDBDatabase> {
 };
 
 
-async function getDataset(set: DataSetName, setType: Images): Promise<Matrix | undefined>;
+async function getDataset(set: DataSetName, setType: Images): Promise<Uint8Array[] | undefined>;
 async function getDataset(set: DataSetName, setType: Labels): Promise<Uint8Array | undefined>;
 
-async function getDataset(set: DataSetName, setType: DataSetType): Promise<Matrix | Uint8Array | undefined>{
+async function getDataset(set: DataSetName, setType: DataSetType): Promise<Uint8Array[] | Uint8Array | undefined>{
   return new Promise(async (resolve, reject) => {
     const db = await getDb();
     const transaction = db.transaction([objectStoreName], "readonly");
@@ -83,10 +83,10 @@ async function getDataset(set: DataSetName, setType: DataSetType): Promise<Matri
         if (setType === "images"){
           // Indexed db strips the class type away from the object. We have
           // to do this nastiness to get it back
-          const matrixObject: any = value.value;
-          const proto = Matrix.zeros(0,0);
-          Object.setPrototypeOf(matrixObject, proto); 
-          resolve(matrixObject);
+          //const matrixObject: any = value.value;
+          //const proto = Matrix.zeros(0,0);
+          //Object.setPrototypeOf(matrixObject, proto); 
+          resolve(value.value);
         }else{
           resolve(value.value);
         }
@@ -97,7 +97,7 @@ async function getDataset(set: DataSetName, setType: DataSetType): Promise<Matri
   });
 }
 
-async function addDataset(set: DataSetName, data: DataSetType, value: Matrix | Uint8Array): Promise<undefined> {
+async function addDataset(set: DataSetName, data: DataSetType, value: Uint8Array[] | Uint8Array): Promise<undefined> {
   return new Promise(async (resolve, reject) => {
     const db = await getDb();
     const transaction = db.transaction([objectStoreName], "readwrite");
@@ -145,7 +145,7 @@ async function loadMnistTrainLabels(): Promise<Uint8Array>{
   return labelArray;
 }
 
-async function loadMnistTrainSet(): Promise<Matrix>{
+async function loadMnistTrainSet(): Promise<Uint8Array[]>{
   const dsName = "train";
   const dsType = "images";
   let dbRes = await getDataset(dsName, dsType);
@@ -153,7 +153,7 @@ async function loadMnistTrainSet(): Promise<Matrix>{
     console.log("Found indexed db result")
     return dbRes;
   }
-  const dataMatrix = Matrix.zeros(mnistConsts.numImages, mnistConsts.numRows * mnistConsts.numColumns);
+  const dataMatrix: Uint8Array[] = new Array(mnistConsts.numImages);
   await fetch("./data/train-images.idx3-ubyte")
     // Retrieve its body as ReadableStream
     .then(async (response) => {
@@ -184,15 +184,16 @@ async function loadMnistTrainSet(): Promise<Matrix>{
           console.log(`Filling remaining bytes ${remainingBytes} for image ${globalImageNum}`)
           const matrixOffset = imgSize - remainingBytes;
           for (let j = 0; j < remainingBytes; ++j) {
-            dataMatrix.set(globalImageNum, matrixOffset + j, dv.getUint8(j));
+            dataMatrix[globalImageNum][matrixOffset + j] = dv.getUint8(j);
           }          
         }
         
         const fillData = (chunkImageNum: number, globalImageNum: number): number => {
           const start = chunkImageNum * imgSize + initialisationOffset + remainingBytes;
           const end = Math.min(start + imgSize, value.length)
+          dataMatrix[globalImageNum] = new Uint8Array(imgSize);
           for (let j = 0; j < end - start; ++j) {
-            dataMatrix.set(globalImageNum, j, dv.getUint8(start + j));
+            dataMatrix[globalImageNum][j] = dv.getUint8(start + j);
           }
           return (start + imgSize) - value.length;
         }
@@ -231,7 +232,7 @@ export async function loadMnist(): Promise<MNIST>{
       labels: trainLabels,
     },
     test: {
-      set: new Matrix(0, 0),
+      set: [],
       labels: new Uint8Array(),
     }
   }
