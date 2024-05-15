@@ -1,5 +1,3 @@
-import { Matrix } from 'ml-matrix';
-
 interface DataSet {
   dataset: string;
   value: Uint8Array[]

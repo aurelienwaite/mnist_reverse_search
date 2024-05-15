@@ -13,7 +13,9 @@
     "rust": "cd rs_crate; wasm-pack build --target web; npm i ./pkg"
   },
   "dependencies": {
-    "ml-matrix": "^6.11.0",
-    "rs_crate": "file:rs_crate/pkg"
+    "@preact/signals-core": "^1.6.0",
+    "@tensorflow/tfjs-backend-wasm": "^4.19.0",
+    "@tensorflow/tfjs-backend-webgl": "^4.19.0",
+    "@tensorflow/tfjs-core": "^4.19.0"
   }
 }
